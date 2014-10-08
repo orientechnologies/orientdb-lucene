@@ -43,6 +43,7 @@ import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.NIOFSDirectory;
 import org.apache.lucene.util.Version;
+import org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer;
 
 import java.io.File;
 import java.io.IOException;
@@ -282,7 +283,8 @@ public abstract class OLuceneIndexManagerAbstract<V> extends OSharedResourceAdap
         }
       }
     } else {
-      analyzer = new StandardAnalyzer(getVersion(metadata));
+      analyzer = new SmartChineseAnalyzer(getVersion(metadata));
+        //analyzer = new StandardAnalyzer(getVersion(metadata));
     }
     return analyzer;
   }
@@ -355,7 +357,6 @@ public abstract class OLuceneIndexManagerAbstract<V> extends OSharedResourceAdap
   }
 
 
-    @Override
     public OIndexCursor descCursor(ValuesTransformer<V> vValuesTransformer) {
     return null;
     }

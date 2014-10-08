@@ -119,7 +119,11 @@ public class OLuceneIndexType {
       queryParser = new MultiFieldQueryParser(version, index.getFields().toArray(new String[index.getFields().size()]), analyzer);
     }
 
-    return queryParser.parse(key);
+    queryParser.setDefaultOperator(QueryParser.Operator.AND);
+    Query query = queryParser.parse(key);
+    System.out.println(query);
+
+    return query;
   }
 
   public static Sort sort(Query query, OIndexDefinition index, boolean ascSortOrder) {
