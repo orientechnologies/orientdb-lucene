@@ -24,7 +24,7 @@ import com.orientechnologies.orient.core.index.OCompositeKey;
 import java.util.List;
 
 /**
- * Created by enricorisa on 02/10/14.
+ * Created by Enrico Risa (e.risa-at-orientechnologies.com) on 02/10/14.
  */
 public class OLuceneCompositeKey extends OCompositeKey {
   OCommandContext context;

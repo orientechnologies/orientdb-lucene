@@ -32,7 +32,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
- * Created by enricorisa on 03/09/14.
+ * Created by Enrico Risa (e.risa-at-orientechnologies.com) on 03/09/14.
  */
 @Test(groups = "embedded")
 public class GraphEmbeddedTest extends BaseLuceneTest {

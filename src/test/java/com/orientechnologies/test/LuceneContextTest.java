@@ -36,7 +36,7 @@ import java.io.InputStreamReader;
 import java.util.List;
 
 /**
- * Created by enricorisa on 08/10/14.
+ * Created by Enrico Risa (e.risa-at-orientechnologies.com) on 08/10/14.
  */
 @Test(groups = "embedded")
 public class LuceneContextTest extends BaseLuceneTest {

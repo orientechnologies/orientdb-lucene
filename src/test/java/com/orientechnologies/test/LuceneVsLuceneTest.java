@@ -53,7 +53,7 @@ import com.orientechnologies.orient.core.sql.OCommandSQL;
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery;
 
 /**
- * Created by enricorisa on 08/10/14.
+ * Created by Enrico Risa (e.risa-at-orientechnologies.com) on 08/10/14.
  */
 @Test(groups = "embedded")
 public class LuceneVsLuceneTest extends BaseLuceneTest {

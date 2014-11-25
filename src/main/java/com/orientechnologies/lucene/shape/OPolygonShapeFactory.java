@@ -27,7 +27,7 @@ import com.spatial4j.core.shape.Shape;
 import java.text.ParseException;
 
 /**
- * Created by enricorisa on 24/04/14.
+ * Created by Enrico Risa (e.risa-at-orientechnologies.com) on 24/04/14.
  */
 public class OPolygonShapeFactory implements OShapeFactory {
   @Override

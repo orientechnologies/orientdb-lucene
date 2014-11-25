@@ -23,7 +23,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
- * Created by enricorisa on 23/09/14.
+ * Created by Enrico Risa (e.risa-at-orientechnologies.com) on 23/09/14.
  */
 @Test(groups = "remote")
 public class LuceneMultiFieldRemoteTest extends LuceneMultiFieldTest {

@@ -40,7 +40,7 @@ import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 
 /**
- * Created by enricorisa on 07/04/14.
+ * Created by Enrico Risa (e.risa-at-orientechnologies.com) on 07/04/14.
  */
 public class CreateCityDb extends SpeedTestMonoThread {
   private ODatabaseDocumentTx databaseDocumentTx;

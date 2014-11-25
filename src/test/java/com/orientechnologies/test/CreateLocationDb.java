@@ -19,7 +19,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 /**
- * Created by enricorisa on 07/04/14.
+ * Created by Enrico Risa (e.risa-at-orientechnologies.com) on 07/04/14.
  */
 public class CreateLocationDb extends SpeedTestMonoThread {
   private ODatabaseDocumentTx databaseDocumentTx;

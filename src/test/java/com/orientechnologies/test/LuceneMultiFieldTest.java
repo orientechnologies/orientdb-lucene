@@ -37,7 +37,7 @@ import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery;
 
 /**
- * Created by enricorisa on 19/09/14.
+ * Created by Enrico Risa (e.risa-at-orientechnologies.com) on 19/09/14.
  */
 @Test(groups = "embedded")
 public class LuceneMultiFieldTest extends BaseLuceneTest {

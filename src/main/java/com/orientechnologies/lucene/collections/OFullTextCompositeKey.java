@@ -25,7 +25,7 @@ import com.orientechnologies.orient.core.index.OIndexFullText;
 import java.util.List;
 
 /**
- * Created by enricorisa on 16/06/14.
+ * Created by Enrico Risa (e.risa-at-orientechnologies.com) on 16/06/14.
  */
 public class OFullTextCompositeKey extends OLuceneCompositeKey {
 

@@ -32,7 +32,7 @@ import org.testng.annotations.Test;
 import java.util.List;
 
 /**
- * Created by enricorisa on 23/09/14.
+ * Created by Enrico Risa (e.risa-at-orientechnologies.com) on 23/09/14.
  */
 @Test(groups = "embedded")
 public class LuceneMassiveInsertDeleteTest extends BaseLuceneTest {

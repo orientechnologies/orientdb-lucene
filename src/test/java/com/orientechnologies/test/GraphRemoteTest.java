@@ -21,7 +21,7 @@ package com.orientechnologies.test;
 import org.testng.annotations.Test;
 
 /**
- * Created by enricorisa on 04/10/14.
+ * Created by Enrico Risa (e.risa-at-orientechnologies.com) on 04/10/14.
  */
 @Test(groups = "remote")
 public class GraphRemoteTest extends GraphEmbeddedTest {

@@ -31,7 +31,7 @@ import com.orientechnologies.orient.core.sql.OCommandSQL;
 import org.testng.annotations.Test;
 
 /**
- * Created by enricorisa on 02/10/14.
+ * Created by Enrico Risa (e.risa-at-orientechnologies.com) on 02/10/14.
  */
 
 @Test(groups = "embedded")

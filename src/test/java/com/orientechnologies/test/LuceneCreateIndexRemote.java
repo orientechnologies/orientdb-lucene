@@ -25,7 +25,7 @@ import org.testng.annotations.Test;
 import java.io.InputStream;
 
 /**
- * Created by enricorisa on 26/09/14.
+ * Created by Enrico Risa (e.risa-at-orientechnologies.com) on 26/09/14.
  */
 @Test(groups = "remote")
 public class LuceneCreateIndexRemote extends LuceneCreateIndexTest {

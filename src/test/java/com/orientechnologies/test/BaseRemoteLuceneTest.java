@@ -28,7 +28,7 @@ import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 
 /**
- * Created by enricorisa on 19/09/14.
+ * Created by Enrico Risa (e.risa-at-orientechnologies.com) on 19/09/14.
  */
 @Test
 public abstract class BaseRemoteLuceneTest {

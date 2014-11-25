@@ -39,7 +39,7 @@ import com.orientechnologies.orient.core.db.record.OIdentifiable;
 import com.orientechnologies.orient.core.index.OIndexDefinition;
 
 /**
- * Created by enricorisa on 21/03/14.
+ * Created by Enrico Risa (e.risa-at-orientechnologies.com) on 21/03/14.
  */
 public class OLuceneIndexType {
 

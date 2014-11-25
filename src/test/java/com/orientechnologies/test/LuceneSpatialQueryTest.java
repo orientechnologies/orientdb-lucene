@@ -46,7 +46,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 /**
- * Created by enricorisa on 02/10/14.
+ * Created by Enrico Risa (e.risa-at-orientechnologies.com) on 02/10/14.
  */
 @Test(groups = "embedded")
 public class LuceneSpatialQueryTest extends BaseLuceneTest {

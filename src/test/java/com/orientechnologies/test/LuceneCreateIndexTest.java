@@ -33,7 +33,7 @@ import java.io.InputStream;
 import java.util.List;
 
 /**
- * Created by enricorisa on 26/09/14.
+ * Created by Enrico Risa (e.risa-at-orientechnologies.com) on 26/09/14.
  */
 @Test(groups = "embedded")
 public class LuceneCreateIndexTest extends LuceneSingleFieldEmbeddedTest {
