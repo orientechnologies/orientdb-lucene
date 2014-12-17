@@ -96,7 +96,8 @@ public class OLuceneFullTextIndexManager extends OLuceneIndexManagerAbstract {
     Query q = null;
 
     try {
-      q = OLuceneIndexType.createFullQuery(index, key, mgrWriter.getIndexWriter().getAnalyzer(), getVersion(metadata));
+      // q = OLuceneIndexType.createFullQuery(index, key, mgrWriter.getIndexWriter().getAnalyzer(), getVersion(metadata));
+      q = OLuceneIndexType.createFullQuery(index, key, indexHandler.getIndexWriter().getAnalyzer(), getVersion(metadata));
       OCommandContext context = null;
       if (key instanceof OFullTextCompositeKey) {
         context = ((OFullTextCompositeKey) key).getContext();
@@ -104,6 +105,8 @@ public class OLuceneFullTextIndexManager extends OLuceneIndexManagerAbstract {
       return getResults(q, context);
     } catch (ParseException e) {
       throw new OIndexEngineException("Error parsing lucene query ", e);
+    } catch (IOException e) {
+      throw new OIndexEngineException("Error getting  the analyzer from writer query ", e);
     }
   }
 
@@ -134,8 +137,9 @@ public class OLuceneFullTextIndexManager extends OLuceneIndexManagerAbstract {
   private Set<OIdentifiable> getResults(Query query, OCommandContext context) {
 
     try {
-      IndexSearcher searcher = getSearcher();
+      // IndexSearcher searcher = getSearcher();
 
+      IndexSearcher searcher = indexHandler.getIndexSearcher();
       Integer limit = null;
       if (context != null) {
         limit = (Integer) context.getVariable("$limit");
@@ -159,7 +163,7 @@ public class OLuceneFullTextIndexManager extends OLuceneIndexManagerAbstract {
       if (context != null) {
         sendLookupTime(context, docs, limit, startFetching);
       }
-//      return new LuceneResultSet(searcher,docs);
+      // return new LuceneResultSet(searcher,docs);
       return results;
     } catch (IOException e) {
       throw new OIndexException("Error reading from Lucene index", e);

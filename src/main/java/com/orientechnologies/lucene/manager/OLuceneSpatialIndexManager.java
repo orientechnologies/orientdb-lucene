@@ -155,7 +155,8 @@ public class OLuceneSpatialIndexManager extends OLuceneIndexManagerAbstract {
         DistanceUtils.dist2Degrees(distance, DistanceUtils.EARTH_MEAN_RADIUS_KM)));
     Filter filter = strategy.makeFilter(args);
 
-    IndexSearcher searcher = getSearcher();
+    // IndexSearcher searcher = getSearcher();
+    IndexSearcher searcher = indexHandler.getIndexSearcher();
     ValueSource valueSource = strategy.makeDistanceValueSource(p);
     Sort distSort = new Sort(valueSource.getSortField(false)).rewrite(searcher);
 
@@ -190,7 +191,8 @@ public class OLuceneSpatialIndexManager extends OLuceneIndexManagerAbstract {
     if (shape == null)
       return null;
     SpatialArgs args = new SpatialArgs(SpatialOperation.IsWithin, shape);
-    IndexSearcher searcher = getSearcher();
+    // IndexSearcher searcher = getSearcher();
+    IndexSearcher searcher = indexHandler.getIndexSearcher();
 
     Integer limit = null;
     if (context != null) {
