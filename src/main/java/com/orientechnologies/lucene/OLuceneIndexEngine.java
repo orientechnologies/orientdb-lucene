@@ -16,12 +16,8 @@
 
 package com.orientechnologies.lucene;
 
-import java.util.Iterator;
-import java.util.Map;
-
 import com.orientechnologies.common.concur.resource.OSharedResourceAdaptiveExternal;
 import com.orientechnologies.lucene.manager.OLuceneIndexManagerAbstract;
-import com.orientechnologies.orient.core.command.OCommandContext;
 import com.orientechnologies.orient.core.config.OGlobalConfiguration;
 import com.orientechnologies.orient.core.db.record.OIdentifiable;
 import com.orientechnologies.orient.core.id.ORID;
@@ -31,201 +27,204 @@ import com.orientechnologies.orient.core.serialization.serializer.stream.OStream
 
 public class OLuceneIndexEngine<V> extends OSharedResourceAdaptiveExternal implements OIndexEngine<V> {
 
-  private final String                  indexType;
-  protected OLuceneIndexManagerAbstract lucene;
-  protected OIndex                      indexManaged;
-  private ODocument                     indexMetadata;
+    private final String indexType;
+    protected OLuceneIndexManagerAbstract lucene;
+    protected OIndex indexManaged;
+    private ODocument indexMetadata;
 
-  public OLuceneIndexEngine(OLuceneIndexManagerAbstract delegate, String indexType) {
-    super(OGlobalConfiguration.ENVIRONMENT_CONCURRENT.getValueAsBoolean(), OGlobalConfiguration.MVRBTREE_TIMEOUT
-        .getValueAsInteger(), true);
+    public OLuceneIndexEngine(OLuceneIndexManagerAbstract delegate, String indexType) {
+        super(OGlobalConfiguration.ENVIRONMENT_CONCURRENT.getValueAsBoolean(), OGlobalConfiguration.MVRBTREE_TIMEOUT
+                .getValueAsInteger(), true);
 
-    this.lucene = delegate;
-    this.indexType = indexType;
-  }
-
-  @Override
-  public void init() {
-    lucene.init();
-  }
-
-  @Override
-  public void flush() {
-    lucene.commit();
-  }
-
-  @Override
-  public void create(String indexName, OIndexDefinition indexDefinition, String clusterIndexName,
-      OStreamSerializer valueSerializer, boolean isAutomatic) {
-
-    lucene.createIndex(indexName, indexDefinition, clusterIndexName, valueSerializer, isAutomatic, indexMetadata);
-
-  }
-
-  @Override
-  public void delete() {
-
-    lucene.delete();
-
-  }
-
-  @Override
-  public void deleteWithoutLoad(String indexName) {
-    lucene.deleteWithoutLoad(indexName);
-  }
-
-  @Override
-  public void load(ORID indexRid, String indexName, OIndexDefinition indexDefinition, OStreamSerializer valueSerializer,
-      boolean isAutomatic) {
-    lucene.load(indexRid, indexName, indexDefinition, isAutomatic, indexMetadata);
-  }
-
-  @Override
-  public boolean contains(Object key) {
-
-    return lucene.contains(key);
-  }
-
-  @Override
-  public boolean remove(Object key) {
-    return lucene.remove(key);
-  }
-
-  public boolean remove(Object key, OIdentifiable value) {
-    OIdentifiable rid = value;
-    if (value instanceof ODocument) {
-      rid = value.getIdentity();
+        this.lucene = delegate;
+        this.indexType = indexType;
     }
-    return lucene.remove(key, rid);
-  }
 
-  @Override
-  public ORID getIdentity() {
-    return lucene.getIdentity();
-  }
+    @Override
+    public void init() {
+        lucene.init();
+    }
 
-  @Override
-  public void clear() {
-    lucene.clear();
-  }
+    @Override
+    public void flush() {
+        lucene.flush();
+    }
 
-  @Override
-  public void unload() {
-    lucene.commit();
-  }
+    @Override
+    public void create(String indexName, OIndexDefinition indexDefinition, String clusterIndexName,
+                       OStreamSerializer valueSerializer, boolean isAutomatic) {
 
-  @Override
-  public void startTransaction() {
-    lucene.startTransaction();
-  }
+        lucene.createIndex(indexName, indexDefinition, clusterIndexName, valueSerializer, isAutomatic, indexMetadata);
 
-  @Override
-  public void stopTransaction() {
-    lucene.commit();
-  }
+    }
 
-  @Override
-  public void afterTxRollback() {
-    lucene.rollback();
-  }
+    @Override
+    public void delete() {
 
-  @Override
-  public void afterTxCommit() {
-    lucene.afterTxCommit();
-  }
+        lucene.delete();
 
-  @Override
-  public void closeDb() {
-    lucene.commit();
-    lucene.closeDb();
-  }
+    }
 
-  @Override
-  public void close() {
-    lucene.close();
-  }
+    @Override
+    public void deleteWithoutLoad(String indexName) {
+        lucene.deleteWithoutLoad(indexName);
+    }
 
-  @Override
-  public void beforeTxBegin() {
-    lucene.beforeTxBegin();
-  }
+    @Override
+    public void load(ORID indexRid, String indexName, OIndexDefinition indexDefinition, OStreamSerializer valueSerializer,
+                     boolean isAutomatic) {
+        lucene.load(indexRid, indexName, indexDefinition, isAutomatic, indexMetadata);
+    }
 
-  @Override
-  public V get(Object key) {
-    return (V) lucene.get(key);
-  }
+    @Override
+    public boolean contains(Object key) {
 
-  @Override
-  public void put(Object key, V value) {
-    lucene.put(key, value);
-  }
+        return lucene.contains(key);
+    }
 
-  @Override
-  public Object getFirstKey() {
-    return lucene.getFirstKey();
-  }
+    @Override
+    public boolean remove(Object key) {
+        return lucene.remove(key);
+    }
 
-  @Override
-  public Object getLastKey() {
-    return lucene.getLastKey();
-  }
+    public boolean remove(Object key, OIdentifiable value) {
+        OIdentifiable rid = value;
+        if (value instanceof ODocument) {
+            rid = value.getIdentity();
+        }
+        return lucene.remove(key, rid);
+    }
 
-  @Override
-  public OIndexCursor iterateEntriesBetween(Object rangeFrom, boolean fromInclusive, Object rangeTo, boolean toInclusive,
-      boolean ascSortOrder, ValuesTransformer<V> transformer) {
-    return lucene.iterateEntriesBetween(rangeFrom, fromInclusive, rangeTo, toInclusive, ascSortOrder, transformer);
-  }
+    @Override
+    public ORID getIdentity() {
+        return lucene.getIdentity();
+    }
 
-  @Override
-  public OIndexCursor iterateEntriesMajor(Object fromKey, boolean isInclusive, boolean ascSortOrder,
-      ValuesTransformer<V> transformer) {
-    return lucene.iterateEntriesMajor(fromKey, isInclusive, ascSortOrder, transformer);
-  }
+    @Override
+    public void clear() {
+        lucene.clear();
+    }
 
-  @Override
-  public OIndexCursor iterateEntriesMinor(Object toKey, boolean isInclusive, boolean ascSortOrder, ValuesTransformer<V> transformer) {
-    return lucene.iterateEntriesMinor(toKey, isInclusive, ascSortOrder, transformer);
-  }
+    @Override
+    public void unload() {
+        lucene.unload();
+    }
 
-  @Override
-  public OIndexCursor cursor(ValuesTransformer<V> valuesTransformer) {
-    return lucene.cursor(valuesTransformer);
-  }
+    @Override
+    public void startTransaction() {
+        lucene.startTransaction();
+    }
 
-  @Override
-  public OIndexCursor descCursor(ValuesTransformer<V> vValuesTransformer) {
-    return lucene.descCursor(vValuesTransformer);
-  }
+    @Override
+    public void stopTransaction() {
+        lucene.stopTransaction();
+    }
 
-  @Override
-  public OIndexKeyCursor keyCursor() {
-    return lucene.keyCursor();
-  }
+    @Override
+    public void afterTxRollback() {
+        lucene.afterTxRollback();
+    }
 
-  @Override
-  public long size(ValuesTransformer<V> transformer) {
-    return lucene.size(transformer);
+    @Override
+    public void afterTxCommit() {
+        lucene.afterTxCommit();
+    }
 
-  }
+    @Override
+    public void closeDb() {
+        lucene.closeDb();
+    }
 
-  @Override
-  public boolean hasRangeQuerySupport() {
-    return lucene.hasRangeQuerySupport();
-  }
+    @Override
+    public void close() {
+        lucene.close();
+    }
 
-  public void setManagedIndex(OIndex index) {
-    this.indexManaged = index;
-  }
+    @Override
+    public void beforeTxBegin() {
 
-  public void setIndexMetadata(ODocument indexMetadata) {
-    this.indexMetadata = indexMetadata;
-  }
+    }
 
-  public ODocument getIndexMetadata() {
-    return indexMetadata;
-  }
+    @Override
+    public V get(Object key) {
+        return (V) lucene.get(key);
+    }
 
-  public void setRebuilding(boolean rebuilding) {
-    lucene.setRebuilding(rebuilding);
-  }
+    @Override
+    public void put(Object key, V value) {
+        lucene.put(key, value);
+    }
+
+    @Override
+    public Object getFirstKey() {
+        return lucene.getFirstKey();
+    }
+
+    @Override
+    public Object getLastKey() {
+        return lucene.getLastKey();
+    }
+
+    @Override
+    public OIndexCursor iterateEntriesBetween(Object rangeFrom, boolean fromInclusive, Object rangeTo, boolean toInclusive,
+                                              boolean ascSortOrder, ValuesTransformer<V> transformer) {
+        return lucene.iterateEntriesBetween(rangeFrom, fromInclusive, rangeTo, toInclusive, ascSortOrder, transformer);
+    }
+
+    @Override
+    public OIndexCursor iterateEntriesMajor(Object fromKey, boolean isInclusive, boolean ascSortOrder,
+                                            ValuesTransformer<V> transformer) {
+        return lucene.iterateEntriesMajor(fromKey, isInclusive, ascSortOrder, transformer);
+    }
+
+    public void commit() {
+
+    }
+
+    @Override
+    public OIndexCursor iterateEntriesMinor(Object toKey, boolean isInclusive, boolean ascSortOrder, ValuesTransformer<V> transformer) {
+        return lucene.iterateEntriesMinor(toKey, isInclusive, ascSortOrder, transformer);
+    }
+
+    @Override
+    public OIndexCursor cursor(ValuesTransformer<V> valuesTransformer) {
+        return lucene.cursor(valuesTransformer);
+    }
+
+    @Override
+    public OIndexCursor descCursor(ValuesTransformer<V> valuesTransformer) {
+        return null;
+    }
+
+    @Override
+    public OIndexKeyCursor keyCursor() {
+        return lucene.keyCursor();
+    }
+
+    @Override
+    public long size(ValuesTransformer<V> transformer) {
+        return lucene.size(transformer);
+
+    }
+
+    @Override
+    public boolean hasRangeQuerySupport() {
+        return lucene.hasRangeQuerySupport();
+    }
+
+    public void setManagedIndex(OIndex index) {
+        this.indexManaged = index;
+    }
+
+    public void setIndexMetadata(ODocument indexMetadata) {
+        this.indexMetadata = indexMetadata;
+    }
+
+    public ODocument getIndexMetadata() {
+        return indexMetadata;
+    }
+
+    public void setRebuilding(boolean rebuilding) {
+        lucene.setRebuilding(rebuilding);
+    }
 }

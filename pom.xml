@@ -94,6 +94,7 @@
     </distributionManagement>
 
     <properties>
+        <surefire.version>2.17</surefire.version>
         <javac.src.version>1.6</javac.src.version>
         <javac.target.version>1.6</javac.target.version>
         <orientdb.version>1.7.10</orientdb.version>
@@ -116,6 +117,22 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire.version}</version>
+                <configuration>
+                    <argLine>-ea -Xmx2048m -Dindex.flushAfterCreate=false -Dstorage.makeFullCheckpointAfterCreate=false
+                        -Dstorage.makeFullCheckpointAfterClusterCreate=false -Dstorage.wal.syncOnPageFlush=false
+                        -Dstorage.configuration.syncOnUpdate=false
+                    </argLine>
+
+                    <groups>embedded</groups>
+                    <systemPropertyVariables>
+                        <buildDirectory>${project.build.directory}</buildDirectory>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.4</version>
@@ -203,13 +220,8 @@
             <version>5.14.1</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.orientechnologies</groupId>
-            <artifactId>orient-commons</artifactId>
-            <version>${orientdb.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
+
+
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-core</artifactId>
@@ -221,6 +233,13 @@
             <artifactId>orientdb-client</artifactId>
             <version>${orientdb.version}</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.orientechnologies</groupId>
+            <artifactId>orient-commons</artifactId>
+            <version>${orientdb.version}</version>
+            <scope>compile</scope>
+            <type>test-jar</type>
         </dependency>
         <dependency>
             <groupId>com.orientechnologies</groupId>

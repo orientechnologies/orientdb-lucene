@@ -18,67 +18,78 @@ package com.orientechnologies.lucene.operator;
 
 import com.orientechnologies.lucene.collections.OSpatialCompositeKey;
 import com.orientechnologies.orient.core.command.OCommandContext;
+import com.orientechnologies.orient.core.db.ODatabaseComplex;
 import com.orientechnologies.orient.core.db.record.OIdentifiable;
 import com.orientechnologies.orient.core.id.ORID;
 import com.orientechnologies.orient.core.index.*;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
-import com.orientechnologies.orient.core.metadata.schema.OType;
+import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.sql.OIndexSearchResult;
 import com.orientechnologies.orient.core.sql.filter.OSQLFilterCondition;
 import com.orientechnologies.orient.core.sql.operator.OIndexReuseType;
-import com.orientechnologies.orient.core.sql.operator.OQueryOperatorEqualityNotNulls;
+import com.orientechnologies.orient.core.sql.operator.OQueryTargetOperator;
 import org.apache.lucene.spatial.query.SpatialOperation;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
-public class OLuceneWithinOperator extends OQueryOperatorEqualityNotNulls {
+public class OLuceneWithinOperator extends OQueryTargetOperator {
 
-  public OLuceneWithinOperator() {
-    super("WITHIN", 5, false, 1, true);
-  }
+    public OLuceneWithinOperator() {
+        super("WITHIN", 5, false);
+    }
 
-  @Override
-  protected boolean evaluateExpression(OIdentifiable iRecord, OSQLFilterCondition iCondition, Object iLeft, Object iRight,
-      OCommandContext iContext) {
-    return true;
-  }
+    @Override
+    public Collection<OIdentifiable> filterRecords(ODatabaseComplex<?> oDatabaseComplex, List<String> iTargetClasses, OSQLFilterCondition iCondition,
+                                                   Object iLeft, Object iRight) {
+        return null;
+    }
 
-  @Override
-  public OIndexReuseType getIndexReuseType(Object iLeft, Object iRight) {
-    return OIndexReuseType.INDEX_OPERATOR;
-  }
+    @Override
+    public Object evaluateRecord(OIdentifiable iRecord, ODocument iCurrentResult, OSQLFilterCondition iCondition, Object iLeft,
+                                 Object iRight, OCommandContext iContext) {
+        if (iContext.getVariable("$luceneIndex") != null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-  @Override
-  public OIndexCursor executeIndexQuery(OCommandContext iContext, OIndex<?> index, List<Object> keyParams, boolean ascSortOrder) {
-    OIndexDefinition definition = index.getDefinition();
-    int idxSize = definition.getFields().size();
-    int paramsSize = keyParams.size();
-    OIndexCursor cursor;
-    Object indexResult = index.get(new OSpatialCompositeKey(keyParams).setOperation(SpatialOperation.IsWithin));
-    if (indexResult == null || indexResult instanceof OIdentifiable)
-      cursor = new OIndexCursorSingleValue((OIdentifiable) indexResult, new OSpatialCompositeKey(keyParams));
-    else
-      cursor = new OIndexCursorCollectionValue(((Collection<OIdentifiable>) indexResult).iterator(), new OSpatialCompositeKey(
-          keyParams));
-    return cursor;
-  }
+    @Override
+    public OIndexReuseType getIndexReuseType(Object iLeft, Object iRight) {
+        return OIndexReuseType.INDEX_OPERATOR;
+    }
 
-  @Override
-  public ORID getBeginRidRange(Object iLeft, Object iRight) {
-    return null;
-  }
+    @Override
+    public OIndexCursor executeIndexQuery(OCommandContext iContext, OIndex<?> index, List<Object> keyParams, boolean ascSortOrder) {
+        OIndexDefinition definition = index.getDefinition();
+        int idxSize = definition.getFields().size();
+        int paramsSize = keyParams.size();
+        OIndexCursor cursor;
+        Object indexResult = index.get(new OSpatialCompositeKey(keyParams).setOperation(SpatialOperation.IsWithin));
+        if (indexResult == null || indexResult instanceof OIdentifiable)
+            cursor = new OIndexCursorSingleValue((OIdentifiable) indexResult, new OSpatialCompositeKey(keyParams));
+        else
+            cursor = new OIndexCursorCollectionValue(((Collection<OIdentifiable>) indexResult).iterator(), new OSpatialCompositeKey(
+                    keyParams));
 
-  @Override
-  public ORID getEndRidRange(Object iLeft, Object iRight) {
-    return null;
-  }
+        iContext.setVariable("$luceneIndex", true);
+        return cursor;
+    }
 
-  @Override
-  public OIndexSearchResult getOIndexSearchResult(OClass iSchemaClass, OSQLFilterCondition iCondition,
-      List<OIndexSearchResult> iIndexSearchResults, OCommandContext context) {
-    return OLuceneOperatorUtil.buildOIndexSearchResult(iSchemaClass, iCondition, iIndexSearchResults, context);
-  }
+    @Override
+    public ORID getBeginRidRange(Object iLeft, Object iRight) {
+        return null;
+    }
+
+    @Override
+    public ORID getEndRidRange(Object iLeft, Object iRight) {
+        return null;
+    }
+
+    @Override
+    public OIndexSearchResult getOIndexSearchResult(OClass iSchemaClass, OSQLFilterCondition iCondition,
+                                                    List<OIndexSearchResult> iIndexSearchResults, OCommandContext context) {
+        return OLuceneOperatorUtil.buildOIndexSearchResult(iSchemaClass, iCondition, iIndexSearchResults, context);
+    }
 }

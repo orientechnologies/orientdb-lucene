@@ -16,85 +16,87 @@
 
 package com.orientechnologies.lucene.operator;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
 import com.orientechnologies.lucene.collections.OFullTextCompositeKey;
-import com.orientechnologies.lucene.collections.OSpatialCompositeKey;
 import com.orientechnologies.orient.core.command.OCommandContext;
 import com.orientechnologies.orient.core.db.ODatabaseComplex;
 import com.orientechnologies.orient.core.db.record.OIdentifiable;
-import com.orientechnologies.orient.core.exception.OCommandExecutionException;
 import com.orientechnologies.orient.core.id.ORID;
-import com.orientechnologies.orient.core.index.*;
+import com.orientechnologies.orient.core.index.OIndex;
+import com.orientechnologies.orient.core.index.OIndexCursor;
+import com.orientechnologies.orient.core.index.OIndexCursorCollectionValue;
+import com.orientechnologies.orient.core.index.OIndexCursorSingleValue;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.sql.OIndexSearchResult;
 import com.orientechnologies.orient.core.sql.filter.OSQLFilterCondition;
 import com.orientechnologies.orient.core.sql.operator.OIndexReuseType;
-import com.orientechnologies.orient.core.sql.operator.OQueryOperatorEqualityNotNulls;
 import com.orientechnologies.orient.core.sql.operator.OQueryTargetOperator;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class OLuceneTextOperator extends OQueryTargetOperator {
 
-  public OLuceneTextOperator() {
-    super("LUCENE", 5, false);
-  }
-
-  @Override
-  public OIndexCursor executeIndexQuery(OCommandContext iContext, OIndex<?> index, List<Object> keyParams, boolean ascSortOrder) {
-    OIndexCursor cursor;
-    Object indexResult = index.get(new OFullTextCompositeKey(keyParams).setContext(iContext));
-    if (indexResult == null || indexResult instanceof OIdentifiable)
-      cursor = new OIndexCursorSingleValue((OIdentifiable) indexResult, new OFullTextCompositeKey(keyParams));
-    else
-      cursor = new OIndexCursorCollectionValue(((Collection<OIdentifiable>) indexResult).iterator(), new OFullTextCompositeKey(
-          keyParams));
-    iContext.setVariable("$luceneIndex", true);
-    return cursor;
-  }
-
-  @Override
-  public OIndexReuseType getIndexReuseType(Object iLeft, Object iRight) {
-    return OIndexReuseType.INDEX_OPERATOR;
-  }
-
-  @Override
-  public ORID getBeginRidRange(Object iLeft, Object iRight) {
-    return null;
-  }
-
-  @Override
-  public ORID getEndRidRange(Object iLeft, Object iRight) {
-    return null;
-  }
-
-  @Override
-  public OIndexSearchResult getOIndexSearchResult(OClass iSchemaClass, OSQLFilterCondition iCondition,
-      List<OIndexSearchResult> iIndexSearchResults, OCommandContext context) {
-    return OLuceneOperatorUtil.buildOIndexSearchResult(iSchemaClass, iCondition, iIndexSearchResults, context);
-  }
-
-  @Override
-  public Collection<OIdentifiable> filterRecords(ODatabaseComplex<?> iRecord, List<String> iTargetClasses,
-      OSQLFilterCondition iCondition, Object iLeft, Object iRight) {
-    return null;
-  }
-
-  @Override
-  public Object evaluateRecord(OIdentifiable iRecord, ODocument iCurrentResult, OSQLFilterCondition iCondition, Object iLeft,
-      Object iRight, OCommandContext iContext) {
-
-    // Map<String, Float> scores = (Map<String, Float>) iContext.getVariable("$luceneScore");
-    // if (scores != null) {
-    // iContext.setVariable("$score", scores.get(iRecord.getIdentity().toString()));
-    // }
-    if (iContext.getVariable("$luceneIndex") != null) {
-      return true;
-    } else {
-      return false;
+    public OLuceneTextOperator() {
+        super("LUCENE", 5, false);
     }
 
-  }
+    @Override
+    public OIndexCursor executeIndexQuery(OCommandContext iContext, OIndex<?> index, List<Object> keyParams, boolean ascSortOrder) {
+        OIndexCursor cursor;
+        Object indexResult = index.get(new OFullTextCompositeKey(keyParams).setContext(iContext));
+        if (indexResult == null || indexResult instanceof OIdentifiable)
+            cursor = new OIndexCursorSingleValue((OIdentifiable) indexResult, new OFullTextCompositeKey(keyParams));
+        else
+            cursor = new OIndexCursorCollectionValue(((Collection<OIdentifiable>) indexResult).iterator(), new OFullTextCompositeKey(
+                    keyParams));
+        iContext.setVariable("$luceneIndex", true);
+        return cursor;
+    }
+
+    @Override
+    public OIndexReuseType getIndexReuseType(Object iLeft, Object iRight) {
+        return OIndexReuseType.INDEX_OPERATOR;
+    }
+
+    @Override
+    public ORID getBeginRidRange(Object iLeft, Object iRight) {
+        return null;
+    }
+
+    @Override
+    public ORID getEndRidRange(Object iLeft, Object iRight) {
+        return null;
+    }
+
+    @Override
+    public OIndexSearchResult getOIndexSearchResult(OClass iSchemaClass, OSQLFilterCondition iCondition,
+                                                    List<OIndexSearchResult> iIndexSearchResults, OCommandContext context) {
+        return OLuceneOperatorUtil.buildOIndexSearchResult(iSchemaClass, iCondition, iIndexSearchResults, context);
+    }
+
+    @Override
+    public Collection<OIdentifiable> filterRecords(ODatabaseComplex<?> oDatabaseComplex, List<String> iTargetClasses, OSQLFilterCondition iCondition,
+                                                   Object iLeft, Object iRight) {
+        return null;
+    }
+
+
+    @Override
+    public Object evaluateRecord(OIdentifiable iRecord, ODocument iCurrentResult, OSQLFilterCondition iCondition, Object iLeft,
+                                 Object iRight, OCommandContext iContext) {
+
+        if (iContext.getVariable("$luceneIndex") != null) {
+
+            Map<String, Float> scores = (Map<String, Float>) iContext.getVariable("$luceneScore");
+            if (scores != null) {
+                iContext.setVariable("$score", scores.get(iRecord.getIdentity().toString()));
+            }
+            return true;
+        } else {
+            return false;
+        }
+
+    }
 }

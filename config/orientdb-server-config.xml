@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <orient-server>
     <handlers>
+        <handler
+                class="com.orientechnologies.orient.graph.handler.OGraphServerHandler">
+            <parameters>
+                <parameter name="enabled" value="true"/>
+                <parameter name="graph.pool.max" value="50"/>
+            </parameters>
+        </handler>
         <handler class="com.orientechnologies.orient.server.handler.OJMXPlugin">
             <parameters>
                 <parameter value="false" name="enabled"/>
@@ -70,7 +77,7 @@
     </network>
     <storages/>
     <users>
-        <user resources="*" password="gino" name="root"/>
+        <user resources="*" password="root" name="root"/>
         <user resources="connect,server.listDatabases,server.dblist" password="guest" name="guest"/>
     </users>
     <properties>
