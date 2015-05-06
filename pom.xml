@@ -25,7 +25,7 @@
     <version>1.7.8</version>  <!--修改版本号为了确实最终使用的是自己编译的orientdb-lucene-->
     <packaging>jar</packaging>
 
-    <name>lucene</name>
+    <name>orientdb-lucene</name>
     <description>Lucene plugin for OrientDB NoSQL document graph dbms</description>
     <url>http://maven.apache.org</url>
     <inceptionYear>2013</inceptionYear>
@@ -137,6 +137,7 @@
                 </executions>
             </plugin>
             -->
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -186,6 +187,13 @@
                             </execution>
                         </executions>
                     </plugin>
+
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>webstart-maven-plugin</artifactId>
+                        <version>1.0-beta-6</version>
+                     </plugin>
+
                 </plugins>
             </build>
         </profile>
