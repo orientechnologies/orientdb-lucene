@@ -22,15 +22,42 @@ import com.orientechnologies.orient.core.command.OCommandContext;
 import com.orientechnologies.orient.core.index.OCompositeKey;
 import com.orientechnologies.orient.core.index.OIndexFullText;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by enricorisa on 16/06/14.
  */
 public class OFullTextCompositeKey extends OLuceneCompositeKey {
 
+  private Map<String, Object> params = new HashMap<String, Object>();
+
   public OFullTextCompositeKey(final List<?> keys) {
     super(keys);
+  }
+
+  public OFullTextCompositeKey setParameters(Object params) {
+    if (params instanceof Map) {
+      for (Object key : ((Map) params).keySet()) {
+        if (key != null) {
+          this.params.put(key.toString().toLowerCase(), ((Map) params).get(key));
+        }
+      }
+
+      if (this.params.containsKey("q")) {
+        this.params.put("query", this.params.get("q"));
+        this.params.remove("q");
+      }
+    } else {
+      this.params.put("query", params.toString());
+    }
+
+    return this;
+  }
+
+  public Map<String, Object> getParameters() {
+    return params;
   }
 
 }

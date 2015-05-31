@@ -16,6 +16,7 @@
 
 package com.orientechnologies.lucene;
 
+import com.orientechnologies.lucene.collections.OFullTextCompositeKey;
 import com.orientechnologies.lucene.manager.OLuceneIndexManagerAbstract;
 import com.orientechnologies.orient.core.db.record.OIdentifiable;
 import com.orientechnologies.orient.core.index.OCompositeKey;
@@ -29,10 +30,7 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 import org.apache.lucene.util.Version;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by enricorisa on 21/03/14.
@@ -116,38 +114,123 @@ public class OLuceneIndexType {
         return booleanQuery;
     }
 
-    public static Query createFullQuery(OIndexDefinition index, Object key, Analyzer analyzer, Version version) throws ParseException {
+    public static Query createFullTextQuery(OIndexDefinition index, Object key, Analyzer analyzer, Version version) throws ParseException {
 
-        String query = "";
-        if (key instanceof OCompositeKey) {
-            Object params = ((OCompositeKey) key).getKeys().get(0);
-            if (params instanceof Map) {
-                Object q = ((Map) params).get("q");
-                if (q != null) {
-                    query = q.toString();
-                }
-            } else {
-                query = params.toString();
+        String query;
+        Boolean multi = null;
+
+        if (key instanceof OFullTextCompositeKey) {
+            query = ((OFullTextCompositeKey) key).getParameters().get("query").toString();
+            Object parsertype = ((OFullTextCompositeKey) key).getParameters().get("parsertype");
+            if (parsertype != null) {
+                if (parsertype.toString().equalsIgnoreCase("MultiField")) { multi = true; }
+                if (parsertype.toString().equalsIgnoreCase("Class")) { multi = false; }
             }
         } else {
             query = key.toString();
         }
 
-        return getQueryParser(index, query, analyzer, version);
-
-    }
-
-    protected static Query getQueryParser(OIndexDefinition index, String key, Analyzer analyzer, Version version)
-            throws ParseException {
-        QueryParser queryParser;
-        if ((key).startsWith("(")) {
-            queryParser = new QueryParser(version, "", analyzer);
-
-        } else {
-            queryParser = new MultiFieldQueryParser(version, index.getFields().toArray(new String[index.getFields().size()]), analyzer);
+        if (multi == null) {
+            multi = !(query.startsWith("(") & query.endsWith(")"));
         }
 
-        return queryParser.parse(key);
+        return getQueryParser(index, key, multi, analyzer, version).parse(query);
+    }
+
+    protected static QueryParser getQueryParser(OIndexDefinition index, Object key, Boolean multi, Analyzer analyzer, Version version)
+            throws ParseException {
+        Map options;
+        QueryParser queryParser;
+
+        if (key instanceof OFullTextCompositeKey) {
+            options = ((OFullTextCompositeKey) key).getParameters();
+        } else {
+            options = new HashMap<String, Object>();
+        }
+
+        if (options.containsKey("parsertype")) {
+            String pt = options.get("parsertype").toString();
+            if (pt.equalsIgnoreCase("MultiField")) { multi = true; }
+            if (pt.equalsIgnoreCase("Class")) { multi = false; }
+        }
+
+        if (multi) {
+            queryParser = new MultiFieldQueryParser(version, index.getFields().toArray(new String[index.getFields().size()]), analyzer);
+        } else {
+            queryParser = new QueryParser(version, "", analyzer);
+        }
+
+        if (options.containsKey("lowercaseexpandedterms")) {
+            String let = options.get("lowercaseexpandedterms").toString();
+            queryParser.setLowercaseExpandedTerms(Boolean.parseBoolean(let));
+        }
+
+        if (options.containsKey("allowleadingwildcard")) {
+            String alw = options.get("allowleadingwildcard").toString();
+            queryParser.setAllowLeadingWildcard(Boolean.parseBoolean(alw));
+        }
+
+        if (options.containsKey("analyzerangeterms")) {
+            String art = options.get("analyzerangeterms").toString();
+            queryParser.setAnalyzeRangeTerms(Boolean.parseBoolean(art));
+        }
+
+        if (options.containsKey("autogeneratephrasequeries")) {
+            String agpq = options.get("autogeneratephrasequeries").toString();
+            queryParser.setAllowLeadingWildcard(Boolean.parseBoolean(agpq));
+        }
+
+        if (options.containsKey("dateresolution")) {
+            String dr = options.get("dateresolution").toString();
+            queryParser.setDateResolution(DateTools.Resolution.valueOf(dr));
+        }
+
+        if (options.containsKey("defaultoperator")) {
+            String dop = options.get("defaultoperator").toString();
+            queryParser.setDefaultOperator(QueryParser.Operator.valueOf(dop));
+        }
+
+        if (options.containsKey("fuzzyminsim")) {
+            String fms = options.get("fuzzyminsim").toString();
+            queryParser.setFuzzyMinSim(Float.parseFloat(fms));
+        }
+
+        if (options.containsKey("fuzzyprefixlength")) {
+            String fpl = options.get("fuzzyprefixlength").toString();
+            queryParser.setFuzzyPrefixLength(Integer.parseInt(fpl));
+        }
+
+        if (options.containsKey("locale")) {
+            String l = options.get("locale").toString();
+            queryParser.setLocale(new Locale(l));
+        }
+
+        if (options.containsKey("phraseslop")) {
+            String pl = options.get("phraseslop").toString();
+            queryParser.setPhraseSlop(Integer.parseInt(pl));
+        }
+
+        if (options.containsKey("timezone")) {
+            String tl = options.get("timezone").toString();
+            queryParser.setTimeZone(TimeZone.getTimeZone(tl));
+        }
+
+        if (options.containsKey("multitermrewritemethod")) {
+            String mtrm = options.get("multitermrewritemethod").toString();
+
+            if (mtrm.equalsIgnoreCase("SCORING_BOOLEAN_QUERY_REWRITE")) {
+                queryParser.setMultiTermRewriteMethod(MultiTermQuery.SCORING_BOOLEAN_QUERY_REWRITE);
+            } else if (mtrm.equalsIgnoreCase("CONSTANT_SCORE_AUTO_REWRITE_DEFAULT")) {
+                queryParser.setMultiTermRewriteMethod(MultiTermQuery.CONSTANT_SCORE_AUTO_REWRITE_DEFAULT);
+            } else if (mtrm.equalsIgnoreCase("CONSTANT_SCORE_BOOLEAN_QUERY_REWRITE")) {
+                queryParser.setMultiTermRewriteMethod(MultiTermQuery.CONSTANT_SCORE_BOOLEAN_QUERY_REWRITE);
+            } else if (mtrm.equalsIgnoreCase("CONSTANT_SCORE_FILTER_REWRITE")) {
+                queryParser.setMultiTermRewriteMethod(MultiTermQuery.CONSTANT_SCORE_FILTER_REWRITE);
+            }
+
+        }
+
+        return queryParser;
     }
 
     public static Sort sort(Query query, OIndexDefinition index, boolean ascSortOrder) {

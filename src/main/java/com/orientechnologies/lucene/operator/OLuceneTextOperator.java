@@ -48,7 +48,7 @@ public class OLuceneTextOperator extends OQueryTargetOperator {
   @Override
   public OIndexCursor executeIndexQuery(OCommandContext iContext, OIndex<?> index, List<Object> keyParams, boolean ascSortOrder) {
     OIndexCursor cursor;
-    Object indexResult = index.get(new OFullTextCompositeKey(keyParams).setContext(iContext));
+    Object indexResult = index.get(new OFullTextCompositeKey(keyParams).setParameters(keyParams.get(0)).setContext(iContext));
     if (indexResult == null || indexResult instanceof OIdentifiable)
       cursor = new OIndexCursorSingleValue((OIdentifiable) indexResult, new OFullTextCompositeKey(keyParams));
     else

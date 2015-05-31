@@ -100,7 +100,7 @@ public class OLuceneFullTextIndexManager extends OLuceneIndexManagerAbstract {
   public Object get(Object key) {
     Query q = null;
     try {
-      q = OLuceneIndexType.createFullQuery(index, key, mgrWriter.getIndexWriter().getAnalyzer(), getLuceneVersion(metadata));
+      q = OLuceneIndexType.createFullTextQuery(index, key, mgrWriter.getIndexWriter().getAnalyzer(), getLuceneVersion(metadata));
       OCommandContext context = null;
       if (key instanceof OFullTextCompositeKey) {
         context = ((OFullTextCompositeKey) key).getContext();
