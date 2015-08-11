@@ -13,4 +13,6 @@ Two types of indexes are supported:
 1. Full text index
 2. Spatial Index
 
+Starting from OrientDB 2.0, Lucene plugin is part of the OrientDB distribution.
+
 Jump to the [wiki](https://github.com/orientechnologies/orientdb-lucene/wiki) to learn how to use orientdb-lucene!
