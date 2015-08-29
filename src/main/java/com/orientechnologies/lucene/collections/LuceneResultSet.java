@@ -108,7 +108,6 @@ public class LuceneResultSet implements Set<OIdentifiable> {
     }
   }
 
-  @Override
   public int size() {
     return topDocs.totalHits;
   }
@@ -136,62 +135,50 @@ public class LuceneResultSet implements Set<OIdentifiable> {
     }
   }
 
-  @Override
   public boolean isEmpty() {
     return size() == 0;
   }
 
-  @Override
   public boolean contains(Object o) {
     throw new UnsupportedOperationException();
   }
 
-  @Override
   public Iterator<OIdentifiable> iterator() {
     return new OLuceneResultSetIterator();
   }
 
-  @Override
   public Object[] toArray() {
     throw new UnsupportedOperationException();
   }
 
-  @Override
   public <T> T[] toArray(T[] a) {
     throw new UnsupportedOperationException();
   }
 
-  @Override
   public boolean add(OIdentifiable oIdentifiable) {
     throw new UnsupportedOperationException();
   }
 
-  @Override
   public boolean remove(Object o) {
     throw new UnsupportedOperationException();
   }
 
-  @Override
   public boolean containsAll(Collection<?> c) {
     throw new UnsupportedOperationException();
   }
 
-  @Override
   public boolean addAll(Collection<? extends OIdentifiable> c) {
     throw new UnsupportedOperationException();
   }
 
-  @Override
   public boolean retainAll(Collection<?> c) {
     throw new UnsupportedOperationException();
   }
 
-  @Override
   public boolean removeAll(Collection<?> c) {
     throw new UnsupportedOperationException();
   }
 
-  @Override
   public void clear() {
     throw new UnsupportedOperationException();
   }
@@ -211,12 +198,10 @@ public class LuceneResultSet implements Set<OIdentifiable> {
       manager.sendTotalHits(queryContext.context, topDocs);
     }
 
-    @Override
     public boolean hasNext() {
       return index < totalHits;
     }
 
-    @Override
     public OIdentifiable next() {
       if (localIndex == array.length) {
         localIndex = 0;
@@ -265,7 +250,6 @@ public class LuceneResultSet implements Set<OIdentifiable> {
 
     }
 
-    @Override
     public void remove() {
 
     }

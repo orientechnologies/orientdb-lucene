@@ -54,7 +54,7 @@ public class OLuceneFullTextIndexManager extends OLuceneIndexManagerAbstract {
 
     Analyzer analyzer = getAnalyzer(metadata);
     Version version = getLuceneVersion(metadata);
-    IndexWriterConfig iwc = new IndexWriterConfig(version, analyzer);
+    IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
     iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
 
     facetManager = new OLuceneFacetManager(this, metadata);
@@ -68,7 +68,7 @@ public class OLuceneFullTextIndexManager extends OLuceneIndexManagerAbstract {
   public IndexWriter openIndexWriter(Directory directory, ODocument metadata) throws IOException {
     Analyzer analyzer = getAnalyzer(metadata);
     Version version = getLuceneVersion(metadata);
-    IndexWriterConfig iwc = new IndexWriterConfig(version, analyzer);
+    IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
     iwc.setOpenMode(IndexWriterConfig.OpenMode.APPEND);
 
     OLogManager.instance().debug(this, "Opening Lucene index in '%s'...", directory);
@@ -76,29 +76,22 @@ public class OLuceneFullTextIndexManager extends OLuceneIndexManagerAbstract {
     return new IndexWriter(directory, iwc);
   }
 
-  @Override
   public void init() {
 
   }
 
-
-
-  @Override
   public boolean contains(Object key) {
     return false;
   }
 
-  @Override
   public boolean remove(Object key) {
     return false;
   }
 
-  @Override
   public ORID getIdentity() {
     return null;
   }
 
-  @Override
   public Object get(Object key) {
     Query q = null;
     try {
@@ -113,7 +106,6 @@ public class OLuceneFullTextIndexManager extends OLuceneIndexManagerAbstract {
     }
   }
 
-  @Override
   public void put(Object key, Object value) {
     Set<OIdentifiable> container = (Set<OIdentifiable>) value;
     for (OIdentifiable oIdentifiable : container) {
@@ -208,48 +200,39 @@ public class OLuceneFullTextIndexManager extends OLuceneIndexManagerAbstract {
     });
   }
 
-  @Override
   public Object getFirstKey() {
     return null;
   }
 
-  @Override
   public Object getLastKey() {
     return null;
   }
 
-  @Override
   public OIndexCursor iterateEntriesBetween(Object rangeFrom, boolean fromInclusive, Object rangeTo, boolean toInclusive,
       boolean ascSortOrder, ValuesTransformer transformer) {
     return new LuceneIndexCursor((LuceneResultSet) get(rangeFrom), rangeFrom);
   }
 
-  @Override
   public OIndexCursor iterateEntriesMajor(Object fromKey, boolean isInclusive, boolean ascSortOrder, ValuesTransformer transformer) {
     return null;
   }
 
-  @Override
   public OIndexCursor iterateEntriesMinor(Object toKey, boolean isInclusive, boolean ascSortOrder, ValuesTransformer transformer) {
     return null;
   }
 
-  @Override
   public OIndexCursor cursor(ValuesTransformer valuesTransformer) {
     return null;
   }
 
-  @Override
   public OIndexKeyCursor keyCursor() {
     return new OIndexKeyCursor() {
-      @Override
       public Object next(int prefetchSize) {
         return null;
       }
     };
   }
 
-  @Override
   public boolean hasRangeQuerySupport() {
     return false;
   }
@@ -278,23 +261,20 @@ public class OLuceneFullTextIndexManager extends OLuceneIndexManagerAbstract {
       this.key = key;
     }
 
-    @Override
     public Map.Entry<Object, OIdentifiable> nextEntry() {
 
       if (iterator.hasNext()) {
         final OIdentifiable next = iterator.next();
         return new Map.Entry<Object, OIdentifiable>() {
-          @Override
+
           public Object getKey() {
             return key;
           }
 
-          @Override
           public OIdentifiable getValue() {
             return next;
           }
 
-          @Override
           public OIdentifiable setValue(OIdentifiable value) {
             return null;
           }
@@ -303,37 +283,30 @@ public class OLuceneFullTextIndexManager extends OLuceneIndexManagerAbstract {
       return null;
     }
 
-    @Override
     public Set<OIdentifiable> toValues() {
       return null;
     }
 
-    @Override
     public Set<Map.Entry<Object, OIdentifiable>> toEntries() {
       return null;
     }
 
-    @Override
     public Set<Object> toKeys() {
       return null;
     }
 
-    @Override
     public void setPrefetchSize(int prefetchSize) {
 
     }
 
-    @Override
     public boolean hasNext() {
       return false;
     }
 
-    @Override
     public OIdentifiable next() {
       return null;
     }
 
-    @Override
     public void remove() {
 
     }
