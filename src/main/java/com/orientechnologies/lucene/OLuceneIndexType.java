@@ -141,7 +141,7 @@ public class OLuceneIndexType {
       throws ParseException {
     QueryParser queryParser;
     if ((key).startsWith("(")) {
-      queryParser = new QueryParser(version, "", analyzer);
+      queryParser = new QueryParser("", analyzer);
 
     } else {
       String[] fields = null;
@@ -155,7 +155,7 @@ public class OLuceneIndexType {
           fields[i] = "k" + i;
         }
       }
-      queryParser = new MultiFieldQueryParser(version, fields, analyzer);
+      queryParser = new MultiFieldQueryParser(fields, analyzer);
     }
 
     return queryParser.parse(key);

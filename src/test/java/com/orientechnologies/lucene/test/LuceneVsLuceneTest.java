@@ -80,8 +80,8 @@ public class LuceneVsLuceneTest extends BaseLuceneTest {
 
     try {
       Directory dir = getDirectory();
-      Analyzer analyzer = new StandardAnalyzer(OLuceneIndexManagerAbstract.LUCENE_VERSION);
-      IndexWriterConfig iwc = new IndexWriterConfig(OLuceneIndexManagerAbstract.LUCENE_VERSION, analyzer);
+      Analyzer analyzer = new StandardAnalyzer();
+      IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
       iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
       indexWriter = new IndexWriter(dir, iwc);
 
@@ -93,7 +93,7 @@ public class LuceneVsLuceneTest extends BaseLuceneTest {
   }
 
   protected Directory getDirectory() throws IOException {
-    return NIOFSDirectory.open(getPath());
+    return NIOFSDirectory.open(getPath().toPath());
   }
 
   private File getPath() {
@@ -121,8 +121,8 @@ public class LuceneVsLuceneTest extends BaseLuceneTest {
     indexWriter.close();
     IndexReader reader = DirectoryReader.open(getDirectory());
     IndexSearcher searcher = new IndexSearcher(reader);
-    Query query = new MultiFieldQueryParser(OLuceneIndexManagerAbstract.LUCENE_VERSION, new String[] { "title" },
-        new StandardAnalyzer(OLuceneIndexManagerAbstract.LUCENE_VERSION)).parse("down the");
+    Query query = new MultiFieldQueryParser(new String[] { "title" },
+        new StandardAnalyzer()).parse("down the");
     final TopDocs docs = searcher.search(query, Integer.MAX_VALUE);
     ScoreDoc[] hits = docs.scoreDocs;
     List<ODocument> oDocs = databaseDocumentTx.query(new OSQLSynchQuery<ODocument>(

@@ -215,17 +215,14 @@ public abstract class BaseLuceneTest {
         }
 
         Orient.instance().registerListener(new OOrientListener() {
-          @Override
           public void onStorageRegistered(OStorage iStorage) {
 
           }
 
-          @Override
           public void onStorageUnregistered(OStorage iStorage) {
 
           }
 
-          @Override
           public void onShutdown() {
             db.drop();
           }

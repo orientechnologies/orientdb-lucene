@@ -43,17 +43,14 @@ public class OLuceneIndexEngine<V> extends OSharedResourceAdaptiveExternal imple
     this.indexType = indexType;
   }
 
-  @Override
   public void init() {
     lucene.init();
   }
 
-  @Override
   public void flush() {
     lucene.flush();
   }
 
-  @Override
   public void create(OIndexDefinition indexDefinition, String clusterIndexName, OStreamSerializer valueSerializer,
       boolean isAutomatic) {
 
@@ -61,28 +58,23 @@ public class OLuceneIndexEngine<V> extends OSharedResourceAdaptiveExternal imple
 
   }
 
-  @Override
   public void delete() {
     lucene.delete();
   }
 
-  @Override
   public void deleteWithoutLoad(String indexName) {
     lucene.deleteWithoutLoad(indexName);
   }
 
-  @Override
   public void load(ORID indexRid, String indexName, OIndexDefinition indexDefinition, OStreamSerializer valueSerializer,
       boolean isAutomatic) {
     lucene.load(indexRid, indexName, indexDefinition, isAutomatic, indexMetadata);
   }
 
-  @Override
   public boolean contains(Object key) {
     return lucene.contains(key);
   }
 
-  @Override
   public boolean remove(Object key) {
     return lucene.remove(key);
   }
@@ -95,48 +87,39 @@ public class OLuceneIndexEngine<V> extends OSharedResourceAdaptiveExternal imple
     return lucene.remove(key, rid);
   }
 
-  @Override
   public ORID getIdentity() {
     return lucene.getIdentity();
   }
 
-  @Override
   public void clear() {
     lucene.clear();
   }
 
-  @Override
   public void close() {
     lucene.close();
   }
 
-  @Override
   public V get(Object key) {
     return (V) lucene.get(key);
   }
 
-  @Override
   public void put(Object key, V value) {
     lucene.put(key, value);
   }
 
-  @Override
   public Object getFirstKey() {
     return lucene.getFirstKey();
   }
 
-  @Override
   public Object getLastKey() {
     return lucene.getLastKey();
   }
 
-  @Override
   public OIndexCursor iterateEntriesBetween(Object rangeFrom, boolean fromInclusive, Object rangeTo, boolean toInclusive,
       boolean ascSortOrder, ValuesTransformer<V> transformer) {
     return lucene.iterateEntriesBetween(rangeFrom, fromInclusive, rangeTo, toInclusive, ascSortOrder, transformer);
   }
 
-  @Override
   public OIndexCursor iterateEntriesMajor(Object fromKey, boolean isInclusive, boolean ascSortOrder,
       ValuesTransformer<V> transformer) {
     return lucene.iterateEntriesMajor(fromKey, isInclusive, ascSortOrder, transformer);
@@ -146,38 +129,31 @@ public class OLuceneIndexEngine<V> extends OSharedResourceAdaptiveExternal imple
 
   }
 
-  @Override
   public OIndexCursor iterateEntriesMinor(Object toKey, boolean isInclusive, boolean ascSortOrder, ValuesTransformer<V> transformer) {
     return lucene.iterateEntriesMinor(toKey, isInclusive, ascSortOrder, transformer);
   }
 
-  @Override
   public OIndexCursor cursor(ValuesTransformer<V> valuesTransformer) {
     return lucene.cursor(valuesTransformer);
   }
 
-  @Override
   public OIndexCursor descCursor(ValuesTransformer<V> valuesTransformer) {
     return null;
   }
 
-  @Override
   public OIndexKeyCursor keyCursor() {
     return lucene.keyCursor();
   }
 
-  @Override
   public long size(ValuesTransformer<V> transformer) {
     return lucene.size(transformer);
 
   }
 
-  @Override
   public boolean hasRangeQuerySupport() {
     return lucene.hasRangeQuerySupport();
   }
 
-  @Override
   public int getVersion() {
     return 1;
   }

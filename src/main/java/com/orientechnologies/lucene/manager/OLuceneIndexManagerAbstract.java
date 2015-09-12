@@ -63,7 +63,7 @@ public abstract class OLuceneIndexManagerAbstract<V> extends OSharedResourceAdap
   public static final String               RID              = "RID";
   public static final String               KEY              = "KEY";
   public static final String               STORED           = "_STORED";
-  public static final Version              LUCENE_VERSION   = Version.LUCENE_47;
+  public static final Version              LUCENE_VERSION   = Version.LUCENE_5_1_0;
 
   public static final String               OLUCENE_BASE_DIR = "luceneIndexes";
 
@@ -88,7 +88,6 @@ public abstract class OLuceneIndexManagerAbstract<V> extends OSharedResourceAdap
     Orient.instance().registerListener(this);
   }
 
-  @Override
   public void create(OIndexDefinition indexDefinition, String clusterIndexName, OStreamSerializer valueSerializer,
       boolean isAutomatic) {
 
@@ -146,7 +145,6 @@ public abstract class OLuceneIndexManagerAbstract<V> extends OSharedResourceAdap
     }
   }
 
-  @Override
   public void deleteWithoutLoad(String indexName) {
     internalDelete(indexName);
   }
@@ -214,7 +212,6 @@ public abstract class OLuceneIndexManagerAbstract<V> extends OSharedResourceAdap
     }
   }
 
-  @Override
   public void flush() {
 
     try {
@@ -227,7 +224,6 @@ public abstract class OLuceneIndexManagerAbstract<V> extends OSharedResourceAdap
 
   }
 
-  @Override
   public void close() {
     try {
       closeIndex();
@@ -245,7 +241,6 @@ public abstract class OLuceneIndexManagerAbstract<V> extends OSharedResourceAdap
     }
   }
 
-  @Override
   public void load(final ORID indexRid, final String indexName, final OIndexDefinition indexDefinition,
       final OStreamSerializer valueSerializer, final boolean isAutomatic) {
     initIndex(indexName, indexDefinition, null, valueSerializer, isAutomatic, metadata);
@@ -320,7 +315,7 @@ public abstract class OLuceneIndexManagerAbstract<V> extends OSharedResourceAdap
         }
       }
     } else {
-      analyzer = new StandardAnalyzer(getLuceneVersion(metadata));
+      analyzer = new StandardAnalyzer();
     }
     return analyzer;
   }
@@ -416,7 +411,7 @@ public abstract class OLuceneIndexManagerAbstract<V> extends OSharedResourceAdap
 
       OLogManager.instance().debug(this, "Opening NIOFS Lucene db=%s, path=%s", database.getName(), pathname);
 
-      dir = NIOFSDirectory.open(new File(pathname));
+      dir = NIOFSDirectory.open(new File(pathname).toPath());
     } else {
 
       OLogManager.instance().debug(this, "Opening RAM Lucene index db=%s", database.getName());
@@ -482,7 +477,6 @@ public abstract class OLuceneIndexManagerAbstract<V> extends OSharedResourceAdap
     return ODatabaseRecordThreadLocal.INSTANCE.get();
   }
 
-  @Override
   public OIndexCursor descCursor(ValuesTransformer<V> vValuesTransformer) {
     return null;
   }
@@ -490,7 +484,6 @@ public abstract class OLuceneIndexManagerAbstract<V> extends OSharedResourceAdap
   public abstract void onRecordAddedToResultSet(QueryContext queryContext, OContextualRecordId recordId, Document ret,
       ScoreDoc score);
 
-  @Override
   public int getVersion() {
     return 0;
   }
@@ -499,17 +492,14 @@ public abstract class OLuceneIndexManagerAbstract<V> extends OSharedResourceAdap
     this.indexName = indexName;
   }
 
-  @Override
   public void onShutdown() {
     close();
   }
 
-  @Override
   public void onStorageRegistered(OStorage storage) {
 
   }
 
-  @Override
   public void onStorageUnregistered(OStorage storage) {
 
   }
