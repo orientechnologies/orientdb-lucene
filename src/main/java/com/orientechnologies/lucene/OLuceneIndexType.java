@@ -16,12 +16,10 @@
 
 package com.orientechnologies.lucene;
 
-import java.util.Date;
-
+import com.orientechnologies.lucene.manager.OLuceneIndexManagerAbstract;
+import com.orientechnologies.orient.core.db.record.OIdentifiable;
 import com.orientechnologies.orient.core.index.OCompositeKey;
-import com.spatial4j.core.context.SpatialContext;
-import com.spatial4j.core.distance.DistanceUtils;
-import com.spatial4j.core.shape.Point;
+import com.orientechnologies.orient.core.index.OIndexDefinition;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.Term;
@@ -29,21 +27,19 @@ import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
-import org.apache.lucene.spatial.SpatialStrategy;
-import org.apache.lucene.spatial.query.SpatialArgs;
-import org.apache.lucene.spatial.query.SpatialOperation;
 import org.apache.lucene.util.Version;
 
-import com.orientechnologies.lucene.manager.OLuceneIndexManagerAbstract;
-import com.orientechnologies.orient.core.db.record.OIdentifiable;
-import com.orientechnologies.orient.core.index.OIndexDefinition;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Enrico Risa (e.risa-at-orientechnologies.com) on 21/03/14.
  */
 public class OLuceneIndexType {
 
-  public static Field createField(String fieldName, OIdentifiable oIdentifiable, Object value, Field.Store store,
+  public static Field createField(String fieldName, Object value, Field.Store store,
       Field.Index analyzed) {
     Field field = null;
 
@@ -61,7 +57,7 @@ public class OLuceneIndexType {
     } else if (value instanceof Date) {
       field = new LongField(fieldName, ((Date) value).getTime(), store);
 
-    } else if (value instanceof String) {
+    } else {
       field = new Field(fieldName, value.toString(), store, analyzed);
 
     }
@@ -100,11 +96,39 @@ public class OLuceneIndexType {
     return new TermQuery(new Term(OLuceneIndexManagerAbstract.RID, value.toString()));
   }
 
+  public static Query createDeleteQuery(OIdentifiable value, List<String> fields, Object key) {
+
+    BooleanQuery booleanQuery = new BooleanQuery();
+
+    booleanQuery.add(new TermQuery(new Term(OLuceneIndexManagerAbstract.RID, value.toString())), BooleanClause.Occur.MUST);
+
+    Map<String, String> values = new HashMap<String, String>();
+    // TODO Implementation of Composite keys with Collection
+    if (key instanceof OCompositeKey) {
+
+    } else {
+      values.put(fields.iterator().next(), key.toString());
+    }
+    for (String s : values.keySet()) {
+      booleanQuery.add(new TermQuery(new Term(s + OLuceneIndexManagerAbstract.STORED, values.get(s))), BooleanClause.Occur.MUST);
+    }
+    return booleanQuery;
+  }
+
   public static Query createFullQuery(OIndexDefinition index, Object key, Analyzer analyzer, Version version) throws ParseException {
 
     String query = "";
     if (key instanceof OCompositeKey) {
-      query = ((OCompositeKey) key).getKeys().get(0).toString();
+      Object params = ((OCompositeKey) key).getKeys().get(0);
+      if (params instanceof Map) {
+        Object q = ((Map) params).get("q");
+        if (q != null) {
+          query = q.toString();
+        }
+      } else {
+        query = params.toString();
+
+      }
     } else {
       query = key.toString();
     }
@@ -120,7 +144,18 @@ public class OLuceneIndexType {
       queryParser = new QueryParser(version, "", analyzer);
 
     } else {
-      queryParser = new MultiFieldQueryParser(version, index.getFields().toArray(new String[index.getFields().size()]), analyzer);
+      String[] fields = null;
+      if (index.isAutomatic()) {
+        fields = index.getFields().toArray(new String[index.getFields().size()]);
+      } else {
+        int length = index.getTypes().length;
+
+        fields = new String[length];
+        for (int i = 0; i < length; i++) {
+          fields[i] = "k" + i;
+        }
+      }
+      queryParser = new MultiFieldQueryParser(version, fields, analyzer);
     }
 
     return queryParser.parse(key);

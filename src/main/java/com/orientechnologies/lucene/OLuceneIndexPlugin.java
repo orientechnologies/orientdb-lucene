@@ -17,24 +17,22 @@
 package com.orientechnologies.lucene;
 
 import com.orientechnologies.common.log.OLogManager;
-import com.orientechnologies.common.util.OClassLoaderHelper;
 import com.orientechnologies.lucene.manager.OLuceneIndexManagerAbstract;
 import com.orientechnologies.lucene.operator.OLuceneNearOperator;
 import com.orientechnologies.lucene.operator.OLuceneTextOperator;
 import com.orientechnologies.lucene.operator.OLuceneWithinOperator;
+import com.orientechnologies.orient.core.Orient;
+import com.orientechnologies.orient.core.db.ODatabaseInternal;
+import com.orientechnologies.orient.core.db.ODatabaseLifecycleListener;
+import com.orientechnologies.orient.core.index.OIndex;
 import com.orientechnologies.orient.core.index.OIndexes;
+import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.sql.OSQLEngine;
-import com.orientechnologies.orient.core.sql.functions.OSQLFunction;
 import com.orientechnologies.orient.server.OServer;
 import com.orientechnologies.orient.server.config.OServerParameterConfiguration;
 import com.orientechnologies.orient.server.plugin.OServerPluginAbstract;
-import org.apache.lucene.LucenePackage;
-import org.apache.lucene.util.StringHelper;
 
-import javax.imageio.spi.ServiceRegistry;
-import java.util.Iterator;
-
-public class OLuceneIndexPlugin extends OServerPluginAbstract {
+public class OLuceneIndexPlugin extends OServerPluginAbstract implements ODatabaseLifecycleListener {
 
   public OLuceneIndexPlugin() {
   }
@@ -47,9 +45,9 @@ public class OLuceneIndexPlugin extends OServerPluginAbstract {
   @Override
   public void startup() {
     super.startup();
-    // Orient.instance().addDbLifecycleListener(new OLuceneClassIndexManager());
+    Orient.instance().addDbLifecycleListener(this);
 
-    OIndexes.registerFactory(new OLuceneIndexFactory());
+    OIndexes.registerFactory(new OLuceneIndexFactory(true));
     OSQLEngine.registerOperator(new OLuceneTextOperator());
     OSQLEngine.registerOperator(new OLuceneWithinOperator());
     OSQLEngine.registerOperator(new OLuceneNearOperator());
@@ -65,5 +63,41 @@ public class OLuceneIndexPlugin extends OServerPluginAbstract {
   @Override
   public void shutdown() {
     super.shutdown();
+  }
+
+  @Override
+  public PRIORITY getPriority() {
+    return PRIORITY.REGULAR;
+  }
+
+  @Override
+  public void onCreate(final ODatabaseInternal iDatabase) {
+  }
+
+  @Override
+  public void onOpen(final ODatabaseInternal iDatabase) {
+  }
+
+  @Override
+  public void onClose(final ODatabaseInternal iDatabase) {
+  }
+
+  @Override
+  public void onDrop(final ODatabaseInternal iDatabase) {
+    OLogManager.instance().info(this, "Dropping Lucene indexes...");
+    for (OIndex idx : iDatabase.getMetadata().getIndexManager().getIndexes()) {
+      if (idx.getInternal() instanceof OLuceneIndex) {
+        OLogManager.instance().info(this, "- index '%s'", idx.getName());
+        idx.delete();
+      }
+    }
+  }
+
+  @Override
+  public void onCreateClass(final ODatabaseInternal iDatabase, final OClass iClass) {
+  }
+
+  @Override
+  public void onDropClass(final ODatabaseInternal iDatabase, final OClass iClass) {
   }
 }

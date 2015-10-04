@@ -17,13 +17,16 @@
 package com.orientechnologies.lucene.manager;
 
 import com.orientechnologies.common.log.OLogManager;
+import com.orientechnologies.lucene.OLuceneIndexType;
+import com.orientechnologies.lucene.collections.LuceneResultSet;
 import com.orientechnologies.lucene.collections.OSpatialCompositeKey;
+import com.orientechnologies.lucene.query.QueryContext;
+import com.orientechnologies.lucene.query.SpatialQueryContext;
 import com.orientechnologies.lucene.shape.OShapeFactory;
 import com.orientechnologies.orient.core.command.OCommandContext;
 import com.orientechnologies.orient.core.db.record.OIdentifiable;
 import com.orientechnologies.orient.core.id.OContextualRecordId;
 import com.orientechnologies.orient.core.id.ORID;
-import com.orientechnologies.orient.core.id.ORecordId;
 import com.orientechnologies.orient.core.index.OCompositeKey;
 import com.orientechnologies.orient.core.index.OIndexCursor;
 import com.orientechnologies.orient.core.index.OIndexKeyCursor;
@@ -38,17 +41,11 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.StoredField;
-import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.queries.function.ValueSource;
-import org.apache.lucene.search.Filter;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.MatchAllDocsQuery;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.Sort;
-import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.*;
 import org.apache.lucene.spatial.SpatialStrategy;
 import org.apache.lucene.spatial.prefix.RecursivePrefixTreeStrategy;
 import org.apache.lucene.spatial.prefix.tree.GeohashPrefixTree;
@@ -80,7 +77,7 @@ public class OLuceneSpatialIndexManager extends OLuceneIndexManagerAbstract {
   @Override
   public IndexWriter openIndexWriter(Directory directory, ODocument metadata) throws IOException {
     Analyzer analyzer = getAnalyzer(metadata);
-    Version version = getVersion(metadata);
+    Version version = getLuceneVersion(metadata);
     IndexWriterConfig iwc = new IndexWriterConfig(version, analyzer);
     iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
     return new IndexWriter(directory, iwc);
@@ -89,7 +86,7 @@ public class OLuceneSpatialIndexManager extends OLuceneIndexManagerAbstract {
   @Override
   public IndexWriter createIndexWriter(Directory directory, ODocument metadata) throws IOException {
     Analyzer analyzer = getAnalyzer(metadata);
-    Version version = getVersion(metadata);
+    Version version = getLuceneVersion(metadata);
     IndexWriterConfig iwc = new IndexWriterConfig(version, analyzer);
     iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
     return new IndexWriter(directory, iwc);
@@ -97,11 +94,6 @@ public class OLuceneSpatialIndexManager extends OLuceneIndexManagerAbstract {
 
   @Override
   public void init() {
-
-  }
-
-  @Override
-  public void deleteWithoutLoad(String indexName) {
 
   }
 
@@ -147,39 +139,49 @@ public class OLuceneSpatialIndexManager extends OLuceneIndexManagerAbstract {
 
     double lat = ((Double) OType.convert(((OCompositeKey) key).getKeys().get(0), Double.class)).doubleValue();
     double lng = ((Double) OType.convert(((OCompositeKey) key).getKeys().get(1), Double.class)).doubleValue();
-    Set<OIdentifiable> result = new HashSet<OIdentifiable>();
-
     SpatialOperation operation = SpatialOperation.Intersects;
+
     Point p = ctx.makePoint(lng, lat);
     SpatialArgs args = new SpatialArgs(operation, ctx.makeCircle(lng, lat,
         DistanceUtils.dist2Degrees(distance, DistanceUtils.EARTH_MEAN_RADIUS_KM)));
     Filter filter = strategy.makeFilter(args);
-
     IndexSearcher searcher = getSearcher();
     ValueSource valueSource = strategy.makeDistanceValueSource(p);
     Sort distSort = new Sort(valueSource.getSortField(false)).rewrite(searcher);
 
-    Integer limit = null;
-    if (context != null) {
-      limit = (Integer) context.getVariable("$limit");
-    }
-    int limitDoc = (limit != null && limit > 0) ? limit : Integer.MAX_VALUE;
-    TopDocs topDocs = searcher.search(new MatchAllDocsQuery(), filter, limitDoc, distSort);
-    ScoreDoc[] scoreDocs = topDocs.scoreDocs;
+    return new LuceneResultSet(this,
+        new SpatialQueryContext(context, searcher, new MatchAllDocsQuery(), filter, distSort).setSpatialArgs(args));
+  }
 
-    for (ScoreDoc s : scoreDocs) {
-      Document doc = searcher.doc(s.doc);
+  @Override
+  public void onRecordAddedToResultSet(QueryContext queryContext, OContextualRecordId recordId, Document doc, ScoreDoc score) {
+
+    SpatialQueryContext spatialContext = (SpatialQueryContext) queryContext;
+    if (spatialContext.spatialArgs != null) {
       Point docPoint = (Point) ctx.readShape(doc.get(strategy.getFieldName()));
-      double docDistDEG = ctx.getDistCalc().distance(args.getShape().getCenter(), docPoint);
+      double docDistDEG = ctx.getDistCalc().distance(spatialContext.spatialArgs.getShape().getCenter(), docPoint);
       final double docDistInKM = DistanceUtils.degrees2Dist(docDistDEG, DistanceUtils.EARTH_EQUATORIAL_RADIUS_KM);
-      result.add(new OContextualRecordId(doc.get(RID)).setContext(new HashMap<String, Object>() {
+      recordId.setContext(new HashMap<String, Object>() {
         {
           put("distance", docDistInKM);
         }
-      }));
-
+      });
     }
-    return result;
+  }
+
+  @Override
+  public Document buildDocument(Object key, OIdentifiable value) {
+    return null;
+  }
+
+  @Override
+  public Query buildQuery(Object query) {
+    return null;
+  }
+
+  @Override
+  public Analyzer analyzer(String field) {
+    return null;
   }
 
   public Object searchWithin(OSpatialCompositeKey key, OCommandContext context) throws IOException {
@@ -192,22 +194,9 @@ public class OLuceneSpatialIndexManager extends OLuceneIndexManagerAbstract {
     SpatialArgs args = new SpatialArgs(SpatialOperation.IsWithin, shape);
     IndexSearcher searcher = getSearcher();
 
-    Integer limit = null;
-    if (context != null) {
-      limit = (Integer) context.getVariable("$limit");
-    }
-    int limitDoc = (limit != null && limit > 0) ? limit : Integer.MAX_VALUE;
     Filter filter = strategy.makeFilter(args);
-    TopDocs topDocs = searcher.search(new MatchAllDocsQuery(), filter, limitDoc);
 
-    sendTotalHits(context, topDocs);
-    ScoreDoc[] scoreDocs = topDocs.scoreDocs;
-    for (ScoreDoc s : scoreDocs) {
-      Document doc = searcher.doc(s.doc);
-      result.add(new ORecordId(doc.get(RID)));
-
-    }
-    return result;
+    return new LuceneResultSet(this, new SpatialQueryContext(context, searcher, new MatchAllDocsQuery(), filter));
   }
 
   @Override
@@ -218,7 +207,7 @@ public class OLuceneSpatialIndexManager extends OLuceneIndexManagerAbstract {
     }
     Set<OIdentifiable> container = (Set<OIdentifiable>) value;
     for (OIdentifiable oIdentifiable : container) {
-      addDocument(newGeoDocument(oIdentifiable.getIdentity().toString(), factory.makeShape(compositeKey, ctx)));
+      addDocument(newGeoDocument(oIdentifiable, factory.makeShape(compositeKey, ctx)));
     }
   }
 
@@ -263,7 +252,7 @@ public class OLuceneSpatialIndexManager extends OLuceneIndexManagerAbstract {
     return false;
   }
 
-  private Document newGeoDocument(String rid, Shape shape) {
+  private Document newGeoDocument(OIdentifiable oIdentifiable, Shape shape) {
 
     FieldType ft = new FieldType();
     ft.setIndexed(true);
@@ -271,7 +260,8 @@ public class OLuceneSpatialIndexManager extends OLuceneIndexManagerAbstract {
 
     Document doc = new Document();
 
-    doc.add(new TextField(RID, rid, Field.Store.YES));
+    doc.add(OLuceneIndexType.createField(RID, oIdentifiable.getIdentity().toString(), Field.Store.YES,
+        Field.Index.NOT_ANALYZED_NO_NORMS));
     for (IndexableField f : strategy.createIndexableFields(shape)) {
       doc.add(f);
     }

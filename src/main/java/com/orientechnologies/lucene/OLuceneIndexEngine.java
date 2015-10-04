@@ -24,6 +24,13 @@ import com.orientechnologies.orient.core.id.ORID;
 import com.orientechnologies.orient.core.index.*;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.serialization.serializer.stream.OStreamSerializer;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+
+import java.io.IOException;
 
 public class OLuceneIndexEngine<V> extends OSharedResourceAdaptiveExternal implements OIndexEngine<V> {
 
@@ -51,18 +58,16 @@ public class OLuceneIndexEngine<V> extends OSharedResourceAdaptiveExternal imple
   }
 
   @Override
-  public void create(String indexName, OIndexDefinition indexDefinition, String clusterIndexName,
-      OStreamSerializer valueSerializer, boolean isAutomatic) {
+  public void create(OIndexDefinition indexDefinition, String clusterIndexName, OStreamSerializer valueSerializer,
+      boolean isAutomatic) {
 
-    lucene.createIndex(indexName, indexDefinition, clusterIndexName, valueSerializer, isAutomatic, indexMetadata);
+    lucene.createIndex(indexDefinition, clusterIndexName, valueSerializer, isAutomatic, indexMetadata);
 
   }
 
   @Override
   public void delete() {
-
     lucene.delete();
-
   }
 
   @Override
@@ -78,7 +83,6 @@ public class OLuceneIndexEngine<V> extends OSharedResourceAdaptiveExternal imple
 
   @Override
   public boolean contains(Object key) {
-
     return lucene.contains(key);
   }
 
@@ -177,6 +181,11 @@ public class OLuceneIndexEngine<V> extends OSharedResourceAdaptiveExternal imple
     return lucene.hasRangeQuerySupport();
   }
 
+  @Override
+  public int getVersion() {
+    return 1;
+  }
+
   public void setManagedIndex(OIndex index) {
     this.indexManaged = index;
   }
@@ -192,4 +201,25 @@ public class OLuceneIndexEngine<V> extends OSharedResourceAdaptiveExternal imple
   public void setRebuilding(boolean rebuilding) {
     lucene.setRebuilding(rebuilding);
   }
+
+  public IndexSearcher searcher() throws IOException {
+    return lucene.getSearcher();
+  }
+
+  public void setIndexName(String indexName) {
+    lucene.setIndexName(indexName);
+  }
+
+  public Document buildDocument(Object key, OIdentifiable value) {
+    return lucene.buildDocument(key, value);
+  }
+
+  public Query buildQuery(Object query) throws ParseException {
+    return lucene.buildQuery(query);
+  }
+
+  public Analyzer analyzer(String field) {
+    return lucene.analyzer(field);
+  }
+
 }
