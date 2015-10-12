@@ -41,6 +41,7 @@ import com.orientechnologies.orient.core.storage.impl.local.OAbstractPaginatedSt
 import com.orientechnologies.orient.core.storage.impl.local.paginated.OLocalPaginatedStorage;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexReader;
@@ -52,6 +53,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.NIOFSDirectory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
+import java.util.Collection;
 
 import java.io.File;
 import java.io.IOException;
@@ -298,12 +300,28 @@ public abstract class OLuceneIndexManagerAbstract<V> extends OSharedResourceAdap
     if (metadata != null && metadata.field("analyzer") != null) {
       final String analyzerString = metadata.field("analyzer");
       if (analyzerString != null) {
-        try {
+        Version version = getVersion(metadata);
+		try {
+		  final Class classAnalyzer = Class.forName(analyzerString);
 
-          final Class classAnalyzer = Class.forName(analyzerString);
-          final Constructor constructor = classAnalyzer.getConstructor(Version.class);
+		  CharArraySet stopwords = (CharArraySet) classAnalyzer.getMethod("getDefaultStopSet").invoke(null);
+		  if (metadata.field("stopwords") != null) {
+			  Collection myStopwords = new HashSet((Collection) metadata.field("stopwords"));
+			  Object mergeDefaultStopwords = metadata.field("mergeDefaultStopwords");
+			  if ((mergeDefaultStopwords instanceof Boolean) && ((Boolean) mergeDefaultStopwords == true)) {
+				myStopwords.addAll(stopwords);
+			  }
+			  stopwords = new CharArraySet(version, myStopwords, true);
+		  }
 
-          analyzer = (Analyzer) constructor.newInstance(getLuceneVersion(metadata));
+		  CharArraySet stemExclude = CharArraySet.EMPTY_SET;
+		  if (metadata.field("stemExclude") != null) {
+			  stemExclude = new CharArraySet(version, (Collection) metadata.field("stemExclude"), true);
+		  }
+
+		  final Constructor constructor = classAnalyzer.getConstructor(Version.class, CharArraySet.class, CharArraySet.class);
+
+		  analyzer = (Analyzer) constructor.newInstance(version, stopwords, stemExclude);
         } catch (ClassNotFoundException e) {
           throw new OIndexException("Analyzer: " + analyzerString + " not found", e);
         } catch (NoSuchMethodException e) {
