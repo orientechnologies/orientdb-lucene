@@ -300,7 +300,7 @@ public abstract class OLuceneIndexManagerAbstract<V> extends OSharedResourceAdap
     if (metadata != null && metadata.field("analyzer") != null) {
       final String analyzerString = metadata.field("analyzer");
       if (analyzerString != null) {
-        Version version = getVersion(metadata);
+        Version version = getLuceneVersion(metadata);
 		try {
 		  final Class classAnalyzer = Class.forName(analyzerString);
 
