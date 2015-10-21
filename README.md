@@ -1,3 +1,8 @@
+### Project MOVED
+
+OrientDB Lucene module has been moved to OrientDB core modules: https://github.com/orientechnologies/orientdb/tree/develop/lucene
+
+
 orientdb-lucene
 ===============
 
