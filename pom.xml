@@ -134,6 +134,7 @@
                     <systemPropertyVariables>
                         <buildDirectory>${project.build.directory}</buildDirectory>
                     </systemPropertyVariables>
+                	<forkCount>1.5C</forkCount>
                 </configuration>
             </plugin>
             <plugin>
